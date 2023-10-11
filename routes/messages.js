@@ -12,14 +12,17 @@ const {
   createMessage,
   getMessages,
   getMessageById,
+  updateProcessedFlag,
 } = require(`../controllers/${dbname}/message`);
 const traceId = require('../middleware/traceId');
 
 router.use(traceId);
 // Create a new app
-router.post('/', createMessage);
+router.post('/', validatemessage, createMessage);
 
 router.get('/', validateGetMessagesFilter, getMessages);
 
 router.get('/:id', getMessageById);
+
+router.patch('/process/:id', updateProcessedFlag);
 module.exports = router;

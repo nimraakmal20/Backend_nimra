@@ -7,7 +7,6 @@ const config = require('config');
 const { App } = require('../../models/app');
 const { Event } = require('../../models/event');
 const { Ntype } = require('../../models/notiftype');
-const { Stub } = require('../../models/stub');
 const { Message } = require('../../models/message');
 const logger = require('../../startup/logging');
 
@@ -79,28 +78,14 @@ async function createMessage(req, res) {
 
 async function getMessages(req, res) {
   const { pagesize, pagenum, sortBy, sortOrder, ...filterParams } = req.query;
-
   const pageSize = parseInt(pagesize, 10) || defaultpagesize;
   const pageNum = parseInt(pagenum, 10) || defaultpagenum;
   const skipCount = (pageNum - 1) * pageSize;
-  const sortOptions = {};
   const fromDate = filterParams.FromDate;
   const toDate = filterParams.ToDate;
 
-  if (sortBy) {
-    // Determine the field to sort on based on sortBy value
-    switch (sortBy) {
-      case 'applicationName':
-        sortOptions['application.name'] = sortOrder === 'desc' ? -1 : 1;
-        break;
-      // Add more cases for other sorting options if needed
-      default:
-        // Handle other sorting options or unknown sortBy values
-        break;
-    }
-  }
-
   const filters = [];
+
   if (fromDate && toDate) {
     filters.push({
       $and: [
@@ -109,6 +94,7 @@ async function getMessages(req, res) {
       ],
     });
   }
+
   if (filterParams.ntypeId) {
     const ntype = await Ntype.findById(filterParams.ntypeId);
     if (!ntype) {
@@ -136,23 +122,34 @@ async function getMessages(req, res) {
   }
 
   let filter;
+
   if (filters.length > 0) {
     filter = {
       $and: filters, // Combine multiple conditions with logical AND
     };
   }
 
-  // let messagesQuery = Message.find(filter).skip(skipCount).limit(pageSize);
-  let messagesQuery = Message.find(filter)
-    .skip(skipCount)
-    .limit(pageSize)
-    .populate({
-      path: 'applicationId',
-      select: 'name',
-    });
+  let messagesQuery;
 
   if (sortBy) {
-    messagesQuery = messagesQuery.sort(sortOptions);
+    messagesQuery = Message.find(filter).skip(skipCount).limit(pageSize);
+
+    if (sortBy === 'applicationName') {
+      messagesQuery = messagesQuery.populate({
+        path: 'applicationId',
+        select: 'name',
+      });
+    } else if (sortBy === 'eventName') {
+      messagesQuery = messagesQuery.populate({
+        path: 'eventId',
+        select: 'name',
+      });
+    } else if (sortBy === 'notificationtypeName') {
+      messagesQuery = messagesQuery.populate({
+        path: 'ntypeId',
+        select: 'name',
+      });
+    }
   }
 
   const messages = await messagesQuery.exec();
@@ -165,6 +162,72 @@ async function getMessages(req, res) {
     pageNum,
     totalMessagesCount,
   };
+
+  if (sortOrder === '-1') {
+    if (sortBy === 'applicationName') {
+      responseData.messages = responseData.messages.sort((a, b) => {
+        if (a.applicationId.name > b.applicationId.name) {
+          return -1;
+        }
+        if (a.applicationId.name < b.applicationId.name) {
+          return 1;
+        }
+        return 0;
+      });
+    } else if (sortBy === 'eventName') {
+      responseData.messages = responseData.messages.sort((a, b) => {
+        if (a.eventId.name > b.eventId.name) {
+          return -1;
+        }
+        if (a.eventId.name < b.eventId.name) {
+          return 1;
+        }
+        return 0;
+      });
+    } else if (sortBy === 'notificationtypeName') {
+      responseData.messages = responseData.messages.sort((a, b) => {
+        if (a.ntypeId.name > b.applicationId.name) {
+          return -1;
+        }
+        if (a.ntypeId.name < b.ntypeId.name) {
+          return 1;
+        }
+        return 0;
+      });
+    }
+  } else if (sortOrder === '1') {
+    if (sortBy === 'applicationName') {
+      responseData.messages = responseData.messages.sort((a, b) => {
+        if (a.applicationId.name > b.applicationId.name) {
+          return 1;
+        }
+        if (a.applicationId.name < b.applicationId.name) {
+          return -1;
+        }
+        return 0;
+      });
+    } else if (sortBy === 'eventName') {
+      responseData.messages = responseData.messages.sort((a, b) => {
+        if (a.eventId.name > b.eventId.name) {
+          return 1;
+        }
+        if (a.eventId.name < b.eventId.name) {
+          return -1;
+        }
+        return 0;
+      });
+    } else if (sortBy === 'notificationtypeName') {
+      responseData.messages = responseData.messages.sort((a, b) => {
+        if (a.ntypeId.name > b.applicationId.name) {
+          return 1;
+        }
+        if (a.ntypeId.name < b.ntypeId.name) {
+          return -1;
+        }
+        return 0;
+      });
+    }
+  }
 
   return res.json(responseData);
 }
@@ -182,9 +245,26 @@ async function getMessageById(req, res) {
 
   return res.json(message);
 }
+async function updateProcessedFlag(req, res) {
+  const messageId = req.params.id; // Assuming the parameter is named 'id'
+
+  const message = await Message.findById(messageId);
+
+  if (!message) {
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ error: 'Message not found' });
+  }
+
+  message.processed = true;
+  await message.save();
+
+  return res.json({ message });
+}
 
 module.exports = {
   createMessage,
   getMessages,
   getMessageById,
+  updateProcessedFlag,
 };
