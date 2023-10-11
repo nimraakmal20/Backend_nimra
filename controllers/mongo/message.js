@@ -86,8 +86,18 @@ async function getMessages(req, res) {
   const sortOptions = {};
   const fromDate = filterParams.FromDate;
   const toDate = filterParams.ToDate;
+
   if (sortBy) {
-    sortOptions[sortBy] = parseInt(sortOrder, 10) || 1;
+    // Determine the field to sort on based on sortBy value
+    switch (sortBy) {
+      case 'applicationName':
+        sortOptions['application.name'] = sortOrder === 'desc' ? -1 : 1;
+        break;
+      // Add more cases for other sorting options if needed
+      default:
+        // Handle other sorting options or unknown sortBy values
+        break;
+    }
   }
 
   const filters = [];
@@ -109,39 +119,20 @@ async function getMessages(req, res) {
     filters.push({ ntypeId: { $in: ntype._id } });
   } else if (filterParams.eventId) {
     const event = await Event.findById(filterParams.eventId);
-
     if (!event) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ error: 'Event not found' });
+        .json({ error: 'Event Type not found' });
     }
-
-    const ntypes = await Ntype.find({ eventId: { $in: event._id } });
-
-    const ntypeIds = ntypes.map((ntype) => ntype._id.toString()); // Convert ObjectIds to strings
-
-    // Add a filter condition for ntypeIds
-    filters.push({ ntypeId: { $in: ntypeIds } });
+    filters.push({ eventId: { $in: event._id } });
   } else if (filterParams.applicationId) {
-    const application = await App.findById(filterParams.applicationId);
-
+    const application = await Event.findById(filterParams.applicationId);
     if (!application) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ error: 'Application not found' });
+        .json({ error: 'Application Type not found' });
     }
-
-    // Retrieve events associated with the application
-    const events = await Event.find({ applicationId: application._id });
-
-    // Retrieve ntypes associated with those events
-    const eventIds = events.map((event) => event._id);
-    const ntypes = await Ntype.find({ eventId: { $in: eventIds } });
-
-    const ntypeIds = ntypes.map((ntype) => ntype._id.toString()); // Convert ObjectIds to strings
-
-    // Add a filter condition for ntypeIds
-    filters.push({ ntypeId: { $in: ntypeIds } });
+    filters.push({ applicationId: { $in: application._id } });
   }
 
   let filter;
@@ -151,7 +142,14 @@ async function getMessages(req, res) {
     };
   }
 
-  let messagesQuery = Message.find(filter).skip(skipCount).limit(pageSize);
+  // let messagesQuery = Message.find(filter).skip(skipCount).limit(pageSize);
+  let messagesQuery = Message.find(filter)
+    .skip(skipCount)
+    .limit(pageSize)
+    .populate({
+      path: 'applicationId',
+      select: 'name',
+    });
 
   if (sortBy) {
     messagesQuery = messagesQuery.sort(sortOptions);
