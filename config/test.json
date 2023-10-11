@@ -1,0 +1,17 @@
+{
+  "envType": "test",
+  "allowedDbTypes": ["mongo", "postgres"],
+  "mongodb_connection": "mongodb://localhost/microservice_test",
+  "postgres": {
+    "postgres_user": "postgres",
+    "database": "microservice_test"
+  },
+  "port": 6000,
+  "log": {
+    "console": false
+  },
+  "page": {
+    "size": 10,
+    "num": 1
+  }
+}

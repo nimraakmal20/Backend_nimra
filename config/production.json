@@ -1,0 +1,7 @@
+{
+  "envType": "production",
+  "allowedDbTypes": ["mongo", "postgres"],
+  "log": {
+    "console": true
+  }
+}

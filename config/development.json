@@ -1,0 +1,17 @@
+{
+  "envType": "development",
+  "allowedDbTypes": ["mongo", "postgres"],
+  "mongodb_connection": "mongodb://localhost/microservice",
+  "postgres": {
+    "postgres_user": "postgres",
+    "database": "microservice"
+  },
+  "port": 6000,
+  "log": {
+    "console": true
+  },
+  "page": {
+    "size": 20,
+    "num": 1
+  }
+}
