@@ -9,7 +9,7 @@ const { validatemessage } = require('../middleware/validations');
 const { validateGetMessagesFilter } = require('../middleware/getValidations');
 
 const {
-  createAndSendMessages,
+  createMessage,
   getMessages,
   getMessageById,
 } = require(`../controllers/${dbname}/message`);
@@ -17,7 +17,7 @@ const traceId = require('../middleware/traceId');
 
 router.use(traceId);
 // Create a new app
-router.post('/', createAndSendMessages);
+router.post('/', createMessage);
 
 router.get('/', validateGetMessagesFilter, getMessages);
 

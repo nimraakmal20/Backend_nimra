@@ -109,14 +109,20 @@ function validateGetEventsFilter(req, res, next) {
 }
 
 function validateGetMessagesFilter(req, res, next) {
-  const { pagesize, pagenum, sortBy, ...filterParams } = req.query;
+  const { pagesize, pagenum, sortBy, sortOrder, ...filterParams } = req.query;
 
   // Define schema for pagesize, pagenum, sortBy, and sortOrder
   const querySchema = Joi.object({
     pagesize: Joi.number().integer().positive(),
     pagenum: Joi.number().integer().positive(),
-    sortBy: Joi.string().valid('sendto', 'messageSubject'),
-    // Add sortOrder validation if needed
+    sortBy: Joi.string().valid(
+      'sendto',
+      'messageSubject',
+      'applicationName',
+      'eventName',
+      'notificationtypeName',
+    ),
+    sortOrder: Joi.number().valid(1, -1),
   });
 
   // Validate pagesize, pagenum, sortBy, and sortOrder using the schema
@@ -134,7 +140,13 @@ function validateGetMessagesFilter(req, res, next) {
   const filterSchema = Joi.object({
     sendto: Joi.string().min(5).max(255),
     messageSubject: Joi.string().min(5).max(255),
+    processed: Joi.bool(),
     messageBody: Joi.string().min(5).max(255),
+    applicationId: Joi.string(), // Allow applicationId to be a string
+    eventId: Joi.string(),
+    ntypeId: Joi.string(),
+    FromDate: Joi.date(),
+    ToDate: Joi.date(),
     // Add other filter parameters here
   });
 

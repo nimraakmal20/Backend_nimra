@@ -6,7 +6,7 @@
   "scripts": {
     "migrate": "npx knex migrate:latest --knexfile knexfile.js",
     "start:dev:mongo": "NODE_ENV=development DB_TYPE=mongo nodemon index.js",
-    "start:dev:postgres": "NODE_ENV=development DB_TYPE=postgres nodemon index.js",
+    "start:dev:postgres": "NODE_ENV=development DB_TYPE=postgres postgres_password=hellokitty  node index.js",
     "start:prod": "NODE_ENV=production node index.js",
     "start:test:mongo:integration": "NODE_ENV=test DB_TYPE=mongo jest --watchAll --verbose --detectOpenHandles tests/integration/controllers/mongo",
     "start:test:mongo:unit": "NODE_ENV=test DB_TYPE=mongo jest --watchAll --verbose --detectOpenHandles tests/unit/controllers/mongo",

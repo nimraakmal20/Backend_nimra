@@ -59,8 +59,10 @@ function validatentype(req, res, next) {
 }
 function validatemessage(req, res, next) {
   const schema = Joi.object({
-    ntypeId: Joi.required(),
-    stubId: Joi.required(),
+    ntypeId: Joi.objectId().required(),
+    eventId: Joi.objectId().required(),
+    applicationId: Joi.objectId().required(),
+    processed: Joi.required(),
     sendto: Joi.string().min(5).max(255),
     messageSubject: Joi.string().min(5).max(255).required(),
     messageBody: Joi.string()

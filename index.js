@@ -1,17 +1,18 @@
 const express = require('express');
 const configuration = require('config');
+const cors = require('cors');
 const connectToDatabase = require('./startup/db/mongoDb/mongoDb'); // Import the function
 const logger = require('./startup/logging');
+
 require('express-async-errors');
 const errorHandle = require('./middleware/errorHandle');
-const cors = require('cors');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // Connect to the database
-const { DB_TYPE } = process.env; // config
+const DB_TYPE = configuration.get('DB_TYPE.DB_TYPE'); // config
 if (!DB_TYPE) {
   logger.info('Please provide a valid DB_TYPE environment variable.');
   process.exit(1);

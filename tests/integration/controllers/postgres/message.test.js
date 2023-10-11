@@ -3,7 +3,7 @@ const { StatusCodes } = require('http-status-codes');
 const knex = require('../../../../startup/db/postgresDb/postgresDb');
 const server = require('../../../../index');
 
-describe('POST /api/createAndSendMessages', () => {
+describe('POST /api/createMessage', () => {
   beforeAll(async () => {
     await knex.migrate.latest();
     await knex('apps').insert([

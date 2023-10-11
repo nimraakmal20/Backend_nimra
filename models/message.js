@@ -1,7 +1,25 @@
 const Joi = require('joi');
 const mongoose = require('mongoose');
+const { App } = require('./app');
+const { Event } = require('./event');
+const { Ntype } = require('./notiftype');
 
 const messageSchema = new mongoose.Schema({
+  ntypeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Ntype,
+    required: true,
+  },
+  eventId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Event,
+    required: true,
+  },
+  applicationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: App,
+    required: true,
+  },
   sendto: {
     type: String,
     required: true,
@@ -20,30 +38,17 @@ const messageSchema = new mongoose.Schema({
     minlength: 5,
     maxlength: 500,
   },
+  processed: {
+    type: Boolean,
+    required: true,
+  },
+  created_at: {
+    type: Date,
+    default: Date.now,
+    required: true,
+  },
 });
 
 const Message = mongoose.model('Message', messageSchema);
 
-function validatemessage(message) {
-  const schema = Joi.object({
-    sendto: Joi.string().min(5).max(255),
-    messageSubject: Joi.string().min(5).max(255).required(),
-    messageBody: Joi.string().min(5).max(500).required(),
-  });
-
-  return schema.validate(message);
-}
-
-function validateUpdatemessage(message) {
-  const schema = Joi.object({
-    sendto: Joi.string().min(5).max(255),
-    messageSubject: Joi.string().min(5).max(255),
-    messageBody: Joi.string().min(5).max(500),
-  });
-
-  return schema.validate(message);
-}
-
 exports.Message = Message;
-exports.validate = validatemessage;
-exports.validateUpdatemessage = validateUpdatemessage;

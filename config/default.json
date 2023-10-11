@@ -1,4 +1,8 @@
 {
   "port": 6000,
-  "envType": "development"
+  "envType": "development",
+  "page": {
+    "size": 20,
+    "num": 1
+  }
 }

@@ -6,7 +6,7 @@
     "postgres_user": "postgres",
     "database": "microservice_test"
   },
-  "port": 6000,
+  "port": 3000,
   "log": {
     "console": false
   },

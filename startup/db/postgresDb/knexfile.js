@@ -1,6 +1,8 @@
 /* eslint-disable prettier/prettier */
 const config = require('config');
+const configuration = require('config');
 /**
+ *
  * @type { Object.<string, import("knex").Knex.Config> }
  */
 const postgresqlConfig = config.get('postgres');
@@ -10,7 +12,7 @@ module.exports = {
     connection: {
       database: postgresqlConfig.database,
       user: 'postgres',
-      password: postgresqlConfig.postgres_password,
+      password: configuration.get('postgres_password.postgres_password'),
     },
     pool: {
       min: 2,

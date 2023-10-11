@@ -6,7 +6,7 @@ const logger = require('../startup/logging');
 const MessageDAO = require('../dao/message');
 
 class MessageService {
-  async createAndSendMessages(ntypeId, stubId, recipients) {
+  async createMessage(ntypeId, stubId, recipients) {
     // Fetch ntype and stub details from the database if needed
     // For simplicity, let's assume they're already retrieved
 

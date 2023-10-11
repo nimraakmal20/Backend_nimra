@@ -2,9 +2,7 @@ const request = require('supertest');
 const { StatusCodes } = require('http-status-codes');
 const { Ntype } = require('../../../../models/notiftype');
 const { Message } = require('../../../../models/message');
-const {
-  createAndSendMessages,
-} = require('../../../../controllers/mongo/message'); // Adjust the path as per your project structure
+const { createMessage } = require('../../../../controllers/mongo/message'); // Adjust the path as per your project structure
 
 describe('/api/messages', () => {
   describe('POST /', () => {

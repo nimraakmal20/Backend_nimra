@@ -9,7 +9,7 @@ const logger = require('../../startup/logging');
 const defaultpagesize = config.get('page.size');
 const defaultpagenum = config.get('page.num');
 
-async function createAndSendMessages(req, res) {
+async function createMessage(req, res) {
   const { ntypeId } = req.body;
   // Fetch ntype details
   const ntype = await postgredb('ntype').where('id', ntypeId).first();
@@ -54,7 +54,7 @@ async function createAndSendMessages(req, res) {
 
   return res.json(formattedOutput);
 }
-// async function createAndSendMessages(req, res) {
+// async function createMessage(req, res) {
 //   console.log('enter');
 //   const { ntypeId } = req.body;
 //   console.log(ntypeId);
@@ -171,7 +171,7 @@ async function getMessageById(req, res) {
   return res.json(app);
 }
 module.exports = {
-  createAndSendMessages,
+  createMessage,
   getMessages,
   getMessageById,
 };

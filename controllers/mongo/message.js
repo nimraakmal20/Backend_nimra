@@ -4,6 +4,8 @@
 require('regenerator-runtime/runtime');
 const { StatusCodes } = require('http-status-codes');
 const config = require('config');
+const { App } = require('../../models/app');
+const { Event } = require('../../models/event');
 const { Ntype } = require('../../models/notiftype');
 const { Stub } = require('../../models/stub');
 const { Message } = require('../../models/message');
@@ -12,13 +14,15 @@ const logger = require('../../startup/logging');
 const defaultpagesize = config.get('page.size');
 const defaultpagenum = config.get('page.num');
 
-async function createAndSendMessages(req, res) {
+async function createMessage(req, res) {
   const { ntypeId } = req.body; // Retrieve ntypeId from the request body
   const ntype = await Ntype.findById(ntypeId);
-
+  const { eventId } = ntype;
+  const event = await Event.findById(eventId);
+  const { applicationId } = event;
+  const application = await App.findById(applicationId);
   if (!ntype || ntype.isDeleted)
     return res.status(StatusCodes.NOT_FOUND).send('Invalid ntype.');
-
   const { templateBody, tags } = ntype;
   const { sending: recipients } = req.body;
   const savedMessages = [];
@@ -61,7 +65,10 @@ async function createAndSendMessages(req, res) {
       sendto: recipient.email, // Assuming the email field is present in the recipient object
       messageSubject,
       messageBody,
-      ntypeId,
+      processed: false,
+      ntypeId: ntype,
+      eventId: event,
+      applicationId: application,
     });
 
     savedMessages.push(await message.save());
@@ -77,17 +84,72 @@ async function getMessages(req, res) {
   const pageNum = parseInt(pagenum, 10) || defaultpagenum;
   const skipCount = (pageNum - 1) * pageSize;
   const sortOptions = {};
-
+  const fromDate = filterParams.FromDate;
+  const toDate = filterParams.ToDate;
   if (sortBy) {
     sortOptions[sortBy] = parseInt(sortOrder, 10) || 1;
   }
 
-  const filter = {};
-  for (const key in filterParams) {
-    filter[key] = filterParams[key];
+  const filters = [];
+  if (fromDate && toDate) {
+    filters.push({
+      $and: [
+        { created_at: { $gte: new Date(fromDate) } },
+        { created_at: { $lte: new Date(toDate) } },
+      ],
+    });
+  }
+  if (filterParams.ntypeId) {
+    const ntype = await Ntype.findById(filterParams.ntypeId);
+    if (!ntype) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ error: 'Notification Type not found' });
+    }
+    filters.push({ ntypeId: { $in: ntype._id } });
+  } else if (filterParams.eventId) {
+    const event = await Event.findById(filterParams.eventId);
+
+    if (!event) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ error: 'Event not found' });
+    }
+
+    const ntypes = await Ntype.find({ eventId: { $in: event._id } });
+
+    const ntypeIds = ntypes.map((ntype) => ntype._id.toString()); // Convert ObjectIds to strings
+
+    // Add a filter condition for ntypeIds
+    filters.push({ ntypeId: { $in: ntypeIds } });
+  } else if (filterParams.applicationId) {
+    const application = await App.findById(filterParams.applicationId);
+
+    if (!application) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ error: 'Application not found' });
+    }
+
+    // Retrieve events associated with the application
+    const events = await Event.find({ applicationId: application._id });
+
+    // Retrieve ntypes associated with those events
+    const eventIds = events.map((event) => event._id);
+    const ntypes = await Ntype.find({ eventId: { $in: eventIds } });
+
+    const ntypeIds = ntypes.map((ntype) => ntype._id.toString()); // Convert ObjectIds to strings
+
+    // Add a filter condition for ntypeIds
+    filters.push({ ntypeId: { $in: ntypeIds } });
   }
 
-  // Add any additional filter criteria you need here
+  let filter;
+  if (filters.length > 0) {
+    filter = {
+      $and: filters, // Combine multiple conditions with logical AND
+    };
+  }
 
   let messagesQuery = Message.find(filter).skip(skipCount).limit(pageSize);
 
@@ -124,7 +186,7 @@ async function getMessageById(req, res) {
 }
 
 module.exports = {
-  createAndSendMessages,
+  createMessage,
   getMessages,
   getMessageById,
 };

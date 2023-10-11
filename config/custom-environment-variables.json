@@ -1,5 +1,8 @@
 {
-  "postgres": {
+  "postgres_password": {
     "postgres_password": "postgres_password"
+  },
+  "DB_TYPE": {
+    "DB_TYPE": "DB_TYPE"
   }
 }
