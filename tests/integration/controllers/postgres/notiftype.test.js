@@ -117,7 +117,7 @@ describe('PATCH /api/updateNtype', () => {
     // Additional assertions can be added here to check the response body and database state
   });
 
-  it('Should return 400 if request body is empty', async () => {
+  it('Should return not found if request body is empty', async () => {
     const ntypeId = 1; // Assuming ntypeId 1 exists in the database
     const response = await request(server)
       .patch(`/api/notiftypes/${ntypeId}`)
@@ -126,7 +126,7 @@ describe('PATCH /api/updateNtype', () => {
     expect(response.status).toBe(StatusCodes.BAD_REQUEST);
   });
 
-  it('Should return 400 for an invalid ntypeId', async () => {
+  it('Should return not found for an invalid ntypeId', async () => {
     const invalidNtypeId = 999; // An invalid ntypeId
     const updatedNtype = {
       name: 'Updated Ntype',

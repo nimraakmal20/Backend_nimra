@@ -77,7 +77,9 @@ function validateGetEventsFilter(req, res, next) {
   });
 
   if (queryError) {
-    return res.status(400).json({ error: queryError.details[0].message });
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ error: queryError.details[0].message });
   }
 
   // Define schema for filter parameters
@@ -101,7 +103,9 @@ function validateGetEventsFilter(req, res, next) {
     const { error } = filterSchema.validate(filterData);
 
     if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ error: error.details[0].message });
     }
   }
 
@@ -133,7 +137,9 @@ function validateGetMessagesFilter(req, res, next) {
   });
 
   if (queryError) {
-    return res.status(400).json({ error: queryError.details[0].message });
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ error: queryError.details[0].message });
   }
 
   // Define schema for filter parameters
@@ -161,7 +167,9 @@ function validateGetMessagesFilter(req, res, next) {
     const { error } = filterSchema.validate(filterData);
 
     if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ error: error.details[0].message });
     }
   }
 
@@ -188,7 +196,9 @@ function validateGetNtypesFilter(req, res, next) {
   });
 
   if (queryError) {
-    return res.status(400).json({ error: queryError.details[0].message });
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ error: queryError.details[0].message });
   }
 
   // Define schema for filter parameters
@@ -214,7 +224,9 @@ function validateGetNtypesFilter(req, res, next) {
     const { error } = filterSchema.validate(filterData);
 
     if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ error: error.details[0].message });
     }
   }
 

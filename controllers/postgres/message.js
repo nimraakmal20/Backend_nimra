@@ -15,7 +15,7 @@ async function createMessage(req, res) {
   const ntype = await postgredb('ntype').where('id', ntypeId).first();
   if (!ntype)
     return res.status(StatusCodes.NOT_FOUND).send('Invalid notification type.');
-
+  const { eventId } = ntype; /// // start here
   const { templateBody, tags } = ntype;
 
   const { sending: recipients } = req.body;

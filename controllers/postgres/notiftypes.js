@@ -149,7 +149,7 @@ class NtypeController {
     if (deletedCount > 0) {
       return res.send({ message: 'Ntype deleted successfully' });
     }
-    return res.status(400).send('Invalid ntype.');
+    return res.status(StatusCodes.NOT_FOUND).send('Invalid ntype.');
   }
 
   async getNtypes(req, res) {

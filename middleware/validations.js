@@ -65,10 +65,7 @@ function validatemessage(req, res, next) {
     processed: Joi.required(),
     sendto: Joi.string().min(5).max(255),
     messageSubject: Joi.string().min(5).max(255).required(),
-    messageBody: Joi.string()
-      .min(5)
-      .max(StatusCodes.INTERNAL_SERVER_ERROR)
-      .required(),
+    messageBody: Joi.string().min(5).max(500).required(),
   });
 
   const { error } = schema.validate(req.body);
