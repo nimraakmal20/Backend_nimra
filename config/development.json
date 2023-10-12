@@ -4,7 +4,7 @@
   "mongodb_connection": "mongodb://localhost/newdb",
   "postgres": {
     "postgres_user": "postgres",
-    "database": "PostgresProjectDb"
+    "database": "newdb"
   },
   "port": 3000,
   "log": {

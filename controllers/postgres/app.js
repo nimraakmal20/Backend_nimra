@@ -34,7 +34,9 @@ class AppController {
 
     // Create the new app
     const id = await postgredb('apps').insert(appData).returning('id');
-    return res.status(StatusCodes.OK);
+    return res
+      .status(StatusCodes.OK)
+      .json({ message: 'App posted successfully' });
   }
 
   async updateApp(req, res) {

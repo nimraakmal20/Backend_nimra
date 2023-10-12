@@ -146,7 +146,7 @@ function validateGetMessagesFilter(req, res, next) {
   const filterSchema = Joi.object({
     sendto: Joi.string().min(5).max(255),
     messageSubject: Joi.string().min(5).max(255),
-    processed: Joi.bool(),
+    isProcessed: Joi.bool(),
     messageBody: Joi.string().min(5).max(255),
     applicationId: Joi.string(), // Allow applicationId to be a string
     eventId: Joi.string(),

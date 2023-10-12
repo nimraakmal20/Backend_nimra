@@ -38,7 +38,7 @@ const messageSchema = new mongoose.Schema({
     minlength: 5,
     maxlength: 500,
   },
-  processed: {
+  isProcessed: {
     type: Boolean,
     required: true,
   },

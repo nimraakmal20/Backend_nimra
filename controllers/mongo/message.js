@@ -16,8 +16,10 @@ const defaultpagenum = config.get('page.num');
 async function createMessage(req, res) {
   const { ntypeId } = req.body; // Retrieve ntypeId from the request body
   const ntype = await Ntype.findById(ntypeId);
+  console.log(ntype);
   const { eventId } = ntype;
   const event = await Event.findById(eventId);
+  console.log(event);
   const { applicationId } = event;
   const application = await App.findById(applicationId);
   if (!ntype || ntype.isDeleted)
@@ -64,10 +66,10 @@ async function createMessage(req, res) {
       sendto: recipient.email, // Assuming the email field is present in the recipient object
       messageSubject,
       messageBody,
-      processed: false,
-      ntypeId: ntype,
-      eventId: event,
-      applicationId: application,
+      isProcessed: false,
+      ntypeId,
+      eventId,
+      applicationId,
     });
 
     savedMessages.push(await message.save());
@@ -256,7 +258,7 @@ async function updateProcessedFlag(req, res) {
       .json({ error: 'Message not found' });
   }
 
-  message.processed = true;
+  message.isProcessed = true;
   await message.save();
 
   return res.json({ message });

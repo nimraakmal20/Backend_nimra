@@ -57,12 +57,32 @@ function validatentype(req, res, next) {
   }
   next();
 }
+// function validatemessage(req, res, next) {
+//   const schema = Joi.object({
+//     ntypeId: Joi.objectId().required(),
+//     eventId: Joi.objectId().required(),
+//     applicationId: Joi.objectId().required(),
+//     isProcessed: Joi.required(),
+//     sendto: Joi.string().min(5).max(255),
+//     messageSubject: Joi.string().min(5).max(255).required(),
+//     messageBody: Joi.string().min(5).max(500).required(),
+//   });
+
+//   const { error } = schema.validate(req.body);
+
+//   if (error) {
+//     return res
+//       .status(StatusCodes.NOT_FOUND)
+//       .json({ error: error.details[0].message });
+//   }
+//   next();
+// }
 function validatemessage(req, res, next) {
   const schema = Joi.object({
-    ntypeId: Joi.objectId().required(),
-    eventId: Joi.objectId().required(),
-    applicationId: Joi.objectId().required(),
-    processed: Joi.required(),
+    ntypeId: Joi.required(),
+    // eventId: Joi.required(),
+    // applicationId: Joi.required(),
+    // isProcessed: Joi.bool().required(),
     sendto: Joi.string().min(5).max(255),
     messageSubject: Joi.string().min(5).max(255).required(),
     messageBody: Joi.string().min(5).max(500).required(),
@@ -96,5 +116,6 @@ module.exports = {
   validateevent,
   validatentype,
   validatemessage,
+  // validateMessage,
   validateStub,
 };

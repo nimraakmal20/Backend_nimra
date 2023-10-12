@@ -18,7 +18,7 @@ const traceId = require('../middleware/traceId');
 
 router.use(traceId);
 // Create a new app
-router.post('/', validatemessage, createMessage);
+router.post('/', createMessage);
 
 router.get('/', validateGetMessagesFilter, getMessages);
 

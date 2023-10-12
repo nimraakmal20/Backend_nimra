@@ -9,12 +9,27 @@ exports.up = function (knex) {
     table.string('sendto').notNullable();
     table.string('messageSubject').notNullable();
     table.string('messageBody').notNullable();
+    table.boolean('isProcessed').notNullable();
     table.timestamps(true, true);
     table
       .integer('ntypeId')
       .unsigned()
       .references('id')
+      .inTable('ntype') // Reference the 'notifications' table
+      .onDelete('CASCADE')
+      .onUpdate('CASCADE');
+    table
+      .integer('eventId')
+      .unsigned()
+      .references('id')
       .inTable('event') // Reference the 'notifications' table
+      .onDelete('CASCADE')
+      .onUpdate('CASCADE');
+    table
+      .integer('applicationId')
+      .unsigned()
+      .references('id')
+      .inTable('apps') // Reference the 'notifications' table
       .onDelete('CASCADE')
       .onUpdate('CASCADE');
   });

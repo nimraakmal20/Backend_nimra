@@ -6,7 +6,7 @@
   "scripts": {
     "migrate": "npx knex migrate:latest --knexfile knexfile.js",
     "start:dev:mongo": "NODE_ENV=development DB_TYPE=mongo nodemon index.js",
-    "start:dev:postgres": "NODE_ENV=development DB_TYPE=postgres postgres_password=hellokitty  node index.js",
+    "start:dev:postgres": "NODE_ENV=development DB_TYPE=postgres postgres_password=hellokitty  nodemon index.js",
     "start:prod": "NODE_ENV=production node index.js",
     "start:test:mongo:integration": "NODE_ENV=test DB_TYPE=mongo jest --watchAll --verbose --detectOpenHandles tests/integration/controllers/mongo",
     "start:test:mongo:unit": "NODE_ENV=test DB_TYPE=mongo jest --watchAll --verbose --detectOpenHandles tests/unit/controllers/mongo",
@@ -27,7 +27,7 @@
     "express-async-errors": "^3.1.1",
     "http-status": "^1.6.2",
     "http-status-codes": "^2.2.0",
-    "joi": "^17.9.2",
+    "joi": "^17.11.0",
     "knex": "^2.5.1",
     "mongoose": "^7.4.3",
     "node": "^20.5.0",

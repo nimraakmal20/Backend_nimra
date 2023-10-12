@@ -3,6 +3,7 @@
 /* eslint-disable no-await-in-loop */
 const { StatusCodes } = require('http-status-codes');
 const config = require('config');
+const { async } = require('regenerator-runtime');
 const postgredb = require('../../startup/db/postgresDb/postgresDb');
 const logger = require('../../startup/logging');
 
@@ -15,7 +16,14 @@ async function createMessage(req, res) {
   const ntype = await postgredb('ntype').where('id', ntypeId).first();
   if (!ntype)
     return res.status(StatusCodes.NOT_FOUND).send('Invalid notification type.');
-  const { eventId } = ntype; /// // start here
+  const { eventId } = ntype;
+  const event = await postgredb('event').where('id', eventId).first();
+  if (!event) return res.status(StatusCodes.NOT_FOUND).send('Invalid Event.');
+
+  const { applicationId } = event;
+  const app = await postgredb('apps').where('id', applicationId).first();
+  if (!app) return res.status(StatusCodes.NOT_FOUND).send('Invalid App.');
+
   const { templateBody, tags } = ntype;
 
   const { sending: recipients } = req.body;
@@ -29,9 +37,23 @@ async function createMessage(req, res) {
       if (tags.includes(key)) {
         const tagValue = recipient[key];
         messageSubject = messageSubject.replace(`[[${key}]]`, tagValue);
-        // if tags don't match , give bad request
         messageBody = messageBody.replace(`[[${key}]]`, tagValue);
       }
+    }
+
+    // Check if a message with the same messageBody already exists
+    const existingMessage = await postgredb('message')
+      .where({
+        messageBody,
+        ntypeId,
+        eventId,
+        applicationId,
+      })
+      .first();
+
+    if (existingMessage) {
+      // If a duplicate message is found, return a message indicating the duplicate
+      return res.status(StatusCodes.CONFLICT).send('Duplicate message found');
     }
 
     // Insert message into the database
@@ -40,6 +62,10 @@ async function createMessage(req, res) {
         sendto: recipient.email,
         messageSubject,
         messageBody,
+        ntypeId,
+        eventId,
+        applicationId,
+        isProcessed: false,
       })
       .returning('*');
 
@@ -47,73 +73,13 @@ async function createMessage(req, res) {
   }
 
   const formattedOutput = savedMessages.map((message) => ({
-    sending: message.sendto,
+    sendto: message.sendto,
     subject: message.messageSubject,
     messagebody: message.messageBody,
   }));
 
   return res.json(formattedOutput);
 }
-// async function createMessage(req, res) {
-//   console.log('enter');
-//   const { ntypeId } = req.body;
-//   console.log(ntypeId);
-//   const id = ntypeId;
-//   // Fetch ntype details
-//   const ntype = await postgredb('ntype').where('id', id).first();
-//   console.log('nnnnnnn', ntype);
-//   if (!ntype)
-//     return res.status(StatusCodes.NOT_FOUND).send('Invalid notification type.');
-
-//   const { templateBody, tags } = ntype;
-
-//   const { sending: recipients } = req.body;
-//   const savedMessages = [];
-
-//   for (const recipient of recipients) {
-//     let messageSubject = ntype.templateSubject;
-//     let messageBody = templateBody;
-
-//     let allTagsMatch = true; // Flag to track if all tags match
-
-//     for (const key of Object.keys(recipient)) {
-//       if (tags.includes(key)) {
-//         const tagValue = recipient[key];
-//         messageSubject = messageSubject.replace(`[[${key}]]`, tagValue);
-//         messageBody = messageBody.replace(`[[${key}]]`, tagValue);
-//       } else {
-//         // If a tag doesn't match, set the flag and break the loop
-//         allTagsMatch = false;
-//         break;
-//       }
-//     }
-
-//     if (!allTagsMatch) {
-//       return res
-//         .status(StatusCodes.BAD_REQUEST)
-//         .send('Tags in the message do not match the template.');
-//     }
-
-//     // Insert message into the database
-//     const [message] = await postgredb('message')
-//       .insert({
-//         sendto: recipient.email,
-//         messageSubject,
-//         messageBody,
-//       })
-//       .returning('*');
-
-//     savedMessages.push(message);
-//   }
-
-//   const formattedOutput = savedMessages.map((message) => ({
-//     sending: message.sendto,
-//     subject: message.messageSubject,
-//     messagebody: message.messageBody,
-//   }));
-
-//   return res.json(formattedOutput);
-// }
 
 async function getMessages(req, res) {
   const { pagesize, pagenum, sortBy, sortOrder, ...filterParams } = req.query;
@@ -170,8 +136,14 @@ async function getMessageById(req, res) {
 
   return res.json(app);
 }
+
+async function updateProcessedFlag(req, res) {
+  return 0;
+}
+
 module.exports = {
   createMessage,
   getMessages,
   getMessageById,
+  updateProcessedFlag,
 };
